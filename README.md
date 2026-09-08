@@ -1,1 +1,3 @@
-# ICS0022-MB
+# Secure Programming
+
+Repository for course labs and final project
