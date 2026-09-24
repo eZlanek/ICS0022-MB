@@ -109,3 +109,76 @@ The operating system and application executable are assumed trusted.
   secret copy or prevent all operating-system disk writes.
 - Malware running with sufficient privileges, keyloggers, and a
   compromised operating system are outside the protection scope.
+
+## 4. Vault Format and Cryptographic Scheme
+
+### Cryptographic choices
+
+- Use libsodium for cryptographic operations and secure randomness.
+- Derive a 32-byte encryption key from the master password using
+  Argon2id through `crypto_pwhash()` with the explicit
+  `crypto_pwhash_ALG_ARGON2ID13` algorithm.
+- Generate a random 16-byte salt when creating a vault.
+- Initially use libsodium's MODERATE operation and memory limits.
+  Benchmark these settings on the target computer before finalising
+  them, and store the actual numeric parameters in the header.
+- Encrypt the complete collection of entries using
+  `crypto_aead_xchacha20poly1305_ietf_encrypt()`.
+- Generate a fresh random 24-byte nonce for every save using
+  `randombytes_buf()`. Never deliberately reuse a nonce with a key.
+- Store the 16-byte authentication tag with the ciphertext.
+
+### File structure
+
+The vault is a binary file with this layout:
+
+Header | Ciphertext | Authentication tag
+
+The fixed-size header contains:
+
+| Field | Encoding | Purpose |
+| --- | --- | --- |
+| Magic | 4 bytes: PMGR | Identify the file format |
+| Version | 1 byte | Format version, initially 1 |
+| KDF identifier | 1 byte | Value 1 means Argon2id version 1.3 |
+| Operation limit | 8-byte unsigned integer | Stored key-derivation CPU parameter |
+| Memory limit | 8-byte unsigned integer | Stored key-derivation memory parameter in bytes |
+| Salt | 16 bytes | Random salt generated at vault creation |
+| Nonce | 24 bytes | Fresh random value for each encryption |
+
+Multi-byte integers use little-endian encoding.
+Format version 1 fixes the encryption algorithm to XChaCha20-Poly1305.
+
+Pass the exact stored header bytes as additional authenticated data
+(AAD). The header remains readable, but authentication detects changes.
+
+Validate the header, file size, and supported KDF parameter bounds
+before deriving a key. Reject unsupported versions and algorithms.
+
+### Encrypted payload
+
+Before encryption, entries are represented as UTF-8 JSON.
+Each entry contains an ID, service name, username, and password.
+
+All entry fields are encrypted together. Plaintext JSON is used
+only in memory and is never intentionally saved to disk.
+After successful decryption, validate the JSON structure and fields.
+
+### Unlocking and failure handling
+
+Recreate the key using the entered master password and the stored
+salt and KDF parameters. Unlock the vault only if authenticated
+decryption succeeds.
+
+On authentication failure, report:
+"Unable to unlock vault: incorrect password or damaged file."
+
+Do not release decrypted entries or overwrite the vault on failure.
+A separate stored master-password hash is not required for this design.
+
+### Rationale
+
+Argon2id makes password guessing more expensive.
+Authenticated encryption protects confidentiality and detects tampering.
+A versioned format allows future changes to be recognised explicitly.
+Encrypting the entire payload also hides service names and usernames.
