@@ -23,9 +23,11 @@ The first version will support one local vault per invocation.
 It will not include cloud synchronisation, a browser extension,
 a graphical interface, or shared access between users.
 
-The master password and encryption key will not be stored on disk.
-Decrypted credentials will only be used in memory while the vault
-is unlocked.
+The application will not intentionally write the master password,
+encryption key, or decrypted credentials to disk.
+Sensitive data will be kept in memory only as long as required.
+Operating-system swap and memory-dump limitations are discussed
+in the design document.
 
 ### Project status
 
