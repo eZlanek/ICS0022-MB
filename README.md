@@ -2,112 +2,85 @@
 
 Repository for course labs and final project
 
-## Project: Password Manager
+# Password Manager
 
-A local command-line password manager written in C++17.
-The application will store credentials in an encrypted vault file.
-The user will unlock the vault using a master password.
+A local password manager for storing credentials in an encrypted
+file. The user interacts with the application through commands
+in the terminal and unlocks the vault with a master password.
 
-### Planned features
+The application will work offline without a graphical interface,
+cloud storage or network connections.
 
-- Create a vault protected by a master password.
-- Add credentials containing a service name, username, and password.
-- List saved entries without displaying passwords.
-- Retrieve a selected entry, including its password.
-- Update and delete entries.
-- Encrypt and authenticate the vault using libsodium.
+## Current Status
 
-### Scope and limitations
+Development has not started yet. Only the project design is ready.
+The commands below describe the planned interface and build process.
 
-The first version will support one local vault per invocation.
-It will not include cloud synchronisation, a browser extension,
-a graphical interface, or shared access between users.
-
-The application will not intentionally write the master password,
-encryption key, or decrypted credentials to disk.
-Sensitive data will be kept in memory only as long as required.
-Operating-system swap and memory-dump limitations are discussed
-in the design document.
-
-### Project status
-
-Checkpoint 1: architecture and threat modelling.
-The application is not implemented yet.
-
-### Technology choices
-
-- **C++17:** provides standard containers and RAII for organising
-  the application and managing resources.
-- **libsodium:** provides password-based key derivation,
-  authenticated encryption, secure randomness, and memory-clearing
-  functions. Cryptographic algorithms will not be implemented manually.
-- **nlohmann/json:** provides JSON parsing and serialisation for
-  the encrypted payload. Parsed data will still require validation.
-- **CMake:** manages compilation and library dependencies.
-
-The initial target platform is macOS.
-
-### Planned command-line interface
-
-The executable will be named `password_manager`.
+## Planned Commands
 
 | Command | Purpose |
 | --- | --- |
-| `password_manager init <vault>` | Create a new vault and confirm the master password; refuse to overwrite an existing file |
-| `password_manager add <vault>` | Prompt for a service, username, and password; assign an entry ID |
-| `password_manager list <vault>` | List entry IDs, services, and usernames without displaying passwords |
-| `password_manager get <vault> <id>` | Display one entry, including its password |
-| `password_manager update <vault> <id>` | Prompt for changes to an existing entry |
+| `password_manager init <vault>` | Create a vault; refuse to overwrite an existing file |
+| `password_manager add <vault>` | Add an entry |
+| `password_manager list <vault>` | Show entry IDs, services and usernames without passwords |
+| `password_manager get <vault> <id>` | Reveal the password of a selected entry |
+| `password_manager update <vault> <id>` | Edit an entry |
 | `password_manager delete <vault> <id>` | Delete an entry after confirmation |
-| `password_manager --help` | Display usage information |
+| `password_manager --help` | Show usage information |
 
-Commands accessing an existing vault will request the master password
-through a hidden interactive prompt. New entry passwords will also
-use hidden input. Passwords will not be accepted as command-line arguments.
+`<vault>` is the path to the vault file, and `<id>` identifies an entry.
 
-Each invocation will perform one operation and exit, clearing sensitive
-buffers where possible. There will be no persistent unlocked session.
+Passwords will be entered through hidden interactive prompts.
+Each invocation will perform one operation and exit.
+Changes will be encrypted and saved automatically.
 
-### Build and run plan
+## Planned Dependencies
 
-At Checkpoint 1, the repository contains design documentation.
-The application and build configuration are not implemented yet.
-The commands below describe the intended workflow and cannot yet
-build or run this project.
+- C++17 compiler: compiles the source code.
+- libsodium: provides cryptographic operations.
+- nlohmann/json: converts entries to and from JSON.
+- CMake: configures and runs the build.
+- pkg-config: helps locate installed libraries.
 
-Prerequisites:
+## Planned Build and Run
 
-- A C++17 compiler, such as Apple Clang from Xcode Command Line Tools.
-- Homebrew for installing the planned dependencies.
+The initial target platform is macOS with Xcode Command Line Tools
+and Homebrew.
 
-Install dependencies on macOS:
+Install dependencies:
 
 ```bash
 brew install cmake pkgconf libsodium nlohmann-json
 ```
 
-After source files and `CMakeLists.txt` have been implemented,
-run these commands from the repository root:
+Once the source code and `CMakeLists.txt` exist, run these commands
+from the repository root:
 
 ```bash
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-The planned executable location is `build/password_manager`.
-
-Example usage after implementation:
+The build will compile the source code and link the required libraries.
+The resulting executable will be run as follows:
 
 ```bash
+./build/password_manager --help
 ./build/password_manager init demo.vault
-./build/password_manager add demo.vault
-./build/password_manager list demo.vault
-./build/password_manager get demo.vault 1
 ```
 
-The final command assumes that an entry with ID 1 exists.
+Building and running are not possible at the current design stage.
+These instructions have not yet been tested against an implementation.
 
-### Design document
+## Design Document
 
 See [design.md](design.md) for the architecture, threat model,
-vault format, and cryptographic scheme.
+vault format and cryptographic choices.
+
+## AI Assistance
+
+I used OpenAI Codex to explain technical concepts and help organise,
+edit, format and translate my own explanations. An earlier draft
+was generated by AI. I reviewed my understanding by explaining
+the design in my own words and discussing corrections.
+The application and build workflow have not yet been tested.
