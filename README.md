@@ -20,6 +20,12 @@ plan is ready.
 - update: edit an entry.
 - delete: delete an entry.
 
+## Planned Requirements
+
+- C++17 compiler
+- CMake
+- libsodium
+
 ## Planned Build and Run
 
 The following commands will be used after the source code and
