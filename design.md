@@ -11,6 +11,16 @@ A graphical interface, cloud or centralised storage, network connections, and im
 - Encryption module: derives the key from the master password, verifies authenticity, and encrypts and decrypts entries.
 - Storage layer: reads the vault file and saves changes.
 When saving, updated entries are encrypted and written to a temporary file together with the header. After a successful write, the temporary file atomically replaces the original. If writing fails, the original file is preserved. Viewing entries does not require saving the vault again.
+
+Flow: 
+The CLI receives a command and requests the master password.
+The storage layer reads the vault header and encrypted data.
+The encryption module derives the key using Argon2id, then verifies
+and decrypts the vault using XChaCha20-Poly1305.
+If verification succeeds, the user-management module allows the
+requested operation on the decrypted entries. The CLI displays
+the result without revealing passwords unless explicitly requested.
+If verification fails, access is denied and the file remains unchanged.
 ## File Format and Cryptography
 The public header contains the format version, algorithm identifiers and parameters, salt, and nonce. Entries are stored as ciphertext with an authentication tag. The header is also covered by the authenticity check.
 Argon2id derives the key from the master password, salt, and parameters. XChaCha20-Poly1305 uses this key for authenticated encryption. A fresh random nonce is generated for every save. The master password and key are never intentionally written to disk.
