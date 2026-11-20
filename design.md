@@ -1,5 +1,7 @@
 # Password Manager - Design Document
 
+> Historical Checkpoint 1 design. For the implemented Checkpoint 3 behaviour, see [README.md](README.md) and [REPORT_DRAFT.md](REPORT_DRAFT.md). The implementation uses Make and length-prefixed binary records, and retains the Checkpoint 2 rule that passwords are never displayed.
+
 ## Purpose
 The application will run locally through the terminal without an internet connection. It will store service names, usernames, and passwords in an encrypted file on the user's computer.
 The user enters a master password to access the vault. Entries are decrypted in memory for the duration of a command. Passwords remain hidden when listing entries, but the user can explicitly request the password for a selected entry. Adding, updating, and deleting entries will also be supported.

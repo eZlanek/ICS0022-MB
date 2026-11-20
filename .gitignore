@@ -1,5 +1,13 @@
 /pm
+/pm-test
+/pm-sanitize
+/unit-tests
+/unit-tests-sanitize
+*.dSYM/
+__pycache__/
 *.vault
 *.lock
 *.tmp.*
+*.audit.jsonl
+/vault-data/
 .DS_Store
